@@ -54,6 +54,33 @@ app.post("/user", (req, res) => {
   );
 });
 
+app.post("/event", (req, res) => {
+  const { event_name, event_type_id, event_location, event_description, price, start_time, end_time } = req.body;
+
+  const query = `
+    INSERT INTO event (event_name, event_type_id, event_location, event_description, price, start_time, end_time)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  // Insert the event into the database
+  con.query(query, [event_name, event_type_id, event_location, event_description, price, start_time, end_time], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error adding event to the database: " + err);
+      return;
+    }
+    con.query("SELECT * FROM event WHERE event_id = ?", [result.insertId], (err, event) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("Error fetching newly added event: " + err);
+        return;
+      }
+      res.json(event[0]);
+    });
+  });
+});
+
+
 /**
  *  GET REQUESTS ========================================================================
  */
